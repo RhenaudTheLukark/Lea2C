@@ -1,0 +1,131 @@
+/////////////////////////////////////////////////////////
+// Affectations
+/////////////////////////////////////////////////////////
+
+type
+
+Couleur = (NOIR, ROUGE, JAUNE, BLEU);
+
+Node = struct {
+	firstName: string;
+	lastName: string;
+	age: integer;
+	next: ^Node;
+};
+
+Deque = struct {
+	first: ^Node;
+	last: ^Node;
+};
+
+var
+i1, i2: integer;
+pi1, pi2: float;
+b1, b2: boolean;
+str1, str2: string;
+couleur1, couleur2: Couleur;
+node1, node2: Node;
+p1, p2: ^Node;
+p3 : ^integer;
+table11, table21: array [32] of integer;
+table12, table22: array [32] of array [32] of integer;
+table31, table41: array [32] of float;
+table32, table42: array [32] of array [32] of float;
+table51, table61: array [32] of boolean;
+table52, table62: array [32] of array [32] of boolean;
+table71, table81: array [32] of string;
+table72, table82: array [32] of array [32] of string;
+table91, table101: array [32] of Couleur;
+table92, table102: array [32] of array [32] of Couleur;
+table111, table121: array [32] of Node;
+table112, table122: array [32] of array [32] of Node;
+table131, table141: array [32] of ^Node;
+table132, table142: array [32] of array [32] of ^Node;
+
+begin
+
+i1 = 1;
+i2 = i1;
+pi1 = 3.14;
+pi2 = pi1;
+b1 = true;
+b2 = b1;
+str1 = "azertyuiop";
+str2 = str1;
+couleur1 = NOIR;
+couleur2 = couleur1;
+
+// struct
+node1.age = 36;
+node2 = node1;
+
+// pointer
+p1 = @node1;
+p2 = p1;
+println p2;
+
+new p3;
+p3^ = 45;
+println p3^;
+println p3;
+
+node1 = p1^;
+println p1^.age;
+
+node2.age = 43;
+p1^.age = node2.age;
+println p1^.age;
+
+table11[1] = 1;
+table12[1][1] = 1;
+table21[1] = table11[1];
+table22[1][1] = table12[1][1];
+
+table31[1] = 3.14;
+table32[1][1] = 3.14;
+table41[1] = table31[1];
+table42[1][1] = table32[1][1];
+
+table51[1] = true;
+table52[1][1] = true;
+table61[1] = table51[1];
+table62[1][1] = table52[1][1];
+
+table71[1] = "azertyuiop";
+table72[1][1] = "azertyuiop";
+table81[1] = table71[1];
+table82[1][1] = table72[1][1];
+
+table91[1] = NOIR;
+table92[1][1] = NOIR;
+table101[1] = table91[1];
+table102[1][1] = table92[1][1];
+
+table111[1] = node1;
+table112[1][1] = node1;
+table121[1] = table111[1];
+table122[1][1] = table112[1][1];
+
+table131[1] = @node1;
+table132[1][1] = @node1;
+table141[1] = table131[1];
+table142[1][1] = table132[1][1];
+
+println i1;
+println i2;
+println pi1;
+println pi2;
+println b1;
+println b2;
+println str1;
+println str2;
+println couleur1;
+println couleur2;
+println p2^.age;
+println node1.age;
+println table11[1];
+println table12[1][1];
+println table131[1];
+println table131[1]^.age;
+
+end

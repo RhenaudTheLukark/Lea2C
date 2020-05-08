@@ -1,0 +1,26 @@
+/////////////////////////////////////////////////////////
+// Tableaux
+/////////////////////////////////////////////////////////
+
+type
+T1 = array [3] of string;
+T2 = array [5] of T1;
+T3 = array [7] of T2;
+
+var
+table1: T1;
+table2: T2;
+table3: T3;
+str: string;
+
+begin
+str = "Test OK";
+table1[2] = str;
+table2[4][2] = str;
+table3[6][4][2] = str;
+println table3[6][4][2];
+println table2[4][2];
+println table1[2];
+end
+
+

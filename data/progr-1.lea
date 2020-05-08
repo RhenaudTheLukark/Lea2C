@@ -1,0 +1,56 @@
+/////////////////////////////////////////////////////////
+// Crible d'Ératosthène pour trouver les nombres premiers
+/////////////////////////////////////////////////////////
+
+const
+MAX = 10000;
+RAC = 100;
+
+var
+T: array [MAX] of boolean;
+i, k, maxR: integer;
+
+begin
+// On initialise le tableau
+i = 0;
+while (i < MAX) {
+  T[i] = true;
+  i = i+1;
+}
+
+// A partir de 2, on élimine tous les multiples des premiers
+// nombres premiers
+k = 2;
+while (k < RAC) {
+
+  // On cherche le prochain nombre premier
+  while (! T[k]) {
+    k = k + 1;
+  }
+
+  // On élimine tous ses multiples
+  i = 2 * k;
+  while (i < MAX) {
+    T[i] = false;
+    i = i+k;
+    
+  }
+
+  k = k + 1;
+ }
+
+// On affiche
+print "Les ";
+print MAX;
+print " premiers nombres premiers sont ";
+i = 1;
+while (i < MAX) {
+  if (T[i]) {
+    print i;
+    print " ";
+  }
+  i = i + 1;
+}
+println "";
+
+end

@@ -1,0 +1,55 @@
+/////////////////////////////////////////////////////////
+// Enumérés
+/////////////////////////////////////////////////////////
+
+const
+MAX = 1000;
+
+type
+couleurs = (RED, BLUE, YELLOW);
+jours = (SUNDAY, MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY);
+
+var
+T: array [MAX + 1] of float;
+i, k, maxR: integer;
+c: couleurs;
+j: jours;
+f: float;
+
+begin
+print "Tapez un jour (0=dimanche, 6=Samedi)";
+readln j;
+
+switch (j) {
+	case SUNDAY:
+		println "Dimanche";
+	
+	case MONDAY:
+		println "Lundi";
+
+	case TUESDAY:
+		println "Mardi";
+
+	case WEDNESDAY:
+		println "Mercredi";
+
+	case THURSDAY:
+		println "Jeudi c'est ravioli";
+
+	case FRIDAY:
+		println "Vendredi";
+
+	case SATURDAY:
+		println "Samedi";
+
+	default:
+		println "Non prévu";
+	}
+
+c = YELLOW;
+// c = TUESDAY;
+j = TUESDAY;
+end
+
+
+

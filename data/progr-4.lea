@@ -1,0 +1,60 @@
+/////////////////////////////////////////////////////////
+// structures
+/////////////////////////////////////////////////////////
+
+type
+color = (BROWN, BLUE, BLACK, GREEN);
+
+computer = struct {
+	id: integer;
+	description: string;
+};
+
+user = struct {
+	id: integer;
+	name: string;
+	age: integer;
+	eye_color: color;
+	device: computer;
+};
+
+var
+client1, client2: user;
+ordinateur: computer;
+chaine: string;
+
+begin
+client1.eye_color = BLACK;
+client1.name = "Robert";
+client1.age = 42;
+client1.device.description = "PC";
+client1.device.id = 56;
+
+client2.eye_color = BLUE;
+client2.name = "Robertine";
+client2.age = 67;
+
+print "client1.name: "; println client1.name;
+print "client1.age: "; println client1.age;
+print "client1.device: "; 
+print client1.device.description;
+print "("; print client1.device.id; println ")";
+
+print "client2.name: "; println client2.name;
+print "client2.age: "; println client2.age;
+print "client2.device: "; 
+print client2.device.description;
+print "("; print client2.device.id; println ")";
+
+client2 = client1;
+
+print "client2.name: "; println client2.name;
+print "client2.age: "; println client2.age;
+print "client2.device: "; 
+print client2.device.description;
+print "("; print client2.device.id; println ")";
+
+
+end
+
+

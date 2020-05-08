@@ -1,0 +1,743 @@
+package fr.ubordeaux.deptinfo.compilation.lea.parser;
+
+import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.ArrayList;
+import java_cup.runtime.*;
+import fr.ubordeaux.deptinfo.compilation.lea.environment.*;
+import fr.ubordeaux.deptinfo.compilation.lea.type.*;
+import fr.ubordeaux.deptinfo.compilation.lea.abstract_syntax.*;
+
+parser code {:
+  private static final String NL = "\n";
+
+  private Environment<Type> type_environment = new MapEnvironment<Type>("Types", false);
+  private Environment<Type> variable_environment = new MapEnvironment<Type>("Variables", false);
+  private Environment<ExprVALUE> const_environment = new MapEnvironment<ExprVALUE>("Constants", false);
+  private Environment<Type> function_environment = new MapEnvironment<Type>("Functions", false);
+
+  int enumeredCnt = 0;
+  int structCnt = 0;
+  boolean exceptionType = true;
+  
+  Integer offset = 0;
+  private boolean log = true;
+    
+  public void addLog(String string) {
+	if (log)	
+ 	   System.err.println(string);
+  }
+
+:}
+
+terminal BEGIN, END;
+terminal CONST, VAR, TYPE;
+terminal EQUAL, SEMI, COLON, DOT;
+terminal STRING, INTEGER, FLOAT, BOOLEAN;
+terminal LPAR, RPAR;
+terminal LBRACKET, RBRACKET;
+terminal LBRACE, RBRACE;
+terminal ARRAY, OF;
+terminal STRUCT;
+terminal COMMA;
+terminal PRINT, PRINTLN, READLN;
+terminal IF, ELSE;
+terminal WHILE;
+terminal SWITCH, CASE, DEFAULT;
+terminal FOR;
+terminal NEW, DISPOSE, NULL;
+terminal PLUS, MINUS, MUL, DIV, MOD, UMINUS;
+terminal AND, OR, NOT;
+terminal LT, LE, GT, GE, EQ, NE;
+terminal CIRC, AROBASE;
+
+terminal String IDENTIFIER;
+terminal Integer INTEGER_VALUE;
+terminal Float FLOAT_VALUE;
+terminal String STRING_VALUE;
+terminal TRUE, FALSE;
+terminal PROCEDURE, FUNCTION;
+
+non terminal program, declaration_part, declaration_list, declaration, 
+	var_declaration_list, var_declaration,
+	var_declaration_part,
+	const_declaration_list, const_declaration,
+	type_declaration_list, type_declaration;
+
+non terminal procedure_definition_part, procedure_definition_list, 
+	procedure_definition;
+	
+non terminal Stm block;
+	
+non terminal String procedure_definition_head;
+	
+non terminal Environment<Type> argt_part, argt_list;
+	
+non terminal Pair<String, Type> argt;
+ 
+non terminal Type type, simple_type, array_type,
+	enumerated_type, pointer_type,
+	structure_type;
+	
+non terminal Map<String, Type> feature_list_type;
+	
+non terminal Pair<String, Type> feature_type;
+	
+non terminal List<String> identifier_list;
+	
+non terminal Stm 
+	statement_list_opt, statement_list, statement, simple_statement, 
+	simple_statement_with_semi, 
+	structured_statement, case_statement, default_statement_opt;
+	
+non terminal List<Stm> 
+	case_statement_list;
+	
+non terminal Expr
+	variable_access, expression;
+
+non terminal arg_list_part, arg_list, arg;
+	
+non terminal ExprVALUE
+	value;
+
+precedence nonassoc ELSE;
+precedence nonassoc LT, LE, GT, GE, NE, EQ;
+precedence left PLUS, MINUS;
+precedence left MUL, DIV, MOD;
+precedence nonassoc UMINUS;
+precedence left OR;
+precedence left AND;
+precedence nonassoc NOT;
+precedence nonassoc AROBASE;
+precedence nonassoc LBRACKET;
+precedence right DOT;
+precedence nonassoc CIRC;
+
+//////////////////////////////////////////////////
+//result += "char *__enum_" + getId() + " = \"" + name + "\";" + NL;
+// Programme principal
+//////////////////////////////////////////////////
+program ::=
+	declaration_part 
+	procedure_definition_part
+	BEGIN statement_list_opt:s END
+	{:
+		addLog("*** Reduce program");
+		System.out.println("#include <stdio.h>" + NL 
+			+ "#include <stdlib.h>" + NL 
+			+ "#include <string.h>" + NL
+		    + NL
+			+ variable_environment.generateCode()
+			+ const_environment.generateCode()
+			+ function_environment.generateCode()
+			+ NL
+			+ "int main(int argc, char **argv) {");
+		if (s != null) {
+			s.checkType();
+			s.incIndent();
+			s.indent();
+			System.out.println(s.generateCode());
+		}
+		System.out.println("}");
+	:}
+	;
+
+//////////////////////////////////////////////////
+// Déclarations
+//////////////////////////////////////////////////
+declaration_part ::=
+	/* empty */
+	 	{: addLog("*** Reduce declaration_part"); :}
+	| declaration_list
+	 	{: addLog("*** Reduce declaration_part"); :}
+	;
+	
+declaration_list ::=
+	declaration_list declaration
+	 	{: addLog("*** Reduce declaration_list"); :}
+	| declaration
+	 	{: addLog("*** Reduce declaration_list"); :}
+	;
+	
+declaration ::=
+	TYPE type_declaration_list
+	 	{: addLog("*** Reduce declaration"); 
+		:}
+	| CONST const_declaration_list
+	 	{: addLog("*** Reduce declaration"); :}
+	| VAR var_declaration_list
+	 	{: addLog("*** Reduce declaration"); :}
+	;
+	
+type_declaration_list ::=
+	type_declaration_list type_declaration
+	 	{: addLog("*** Reduce type_declaration_list"); :}
+	| type_declaration
+	 	{: addLog("*** Reduce type_declaration_list"); :}
+	;
+	
+type_declaration ::=
+	identifier_list:l EQUAL type:t SEMI
+	 	{: addLog("*** Reduce type_declaration"); 
+			type_environment.put(l, t);
+		:}
+	;
+	
+const_declaration_list ::=
+	const_declaration_list const_declaration
+	 	{: addLog("*** Reduce const_declaration_list"); :}
+	| const_declaration
+	 	{: addLog("*** Reduce const_declaration_list"); :}
+	;
+	
+const_declaration ::=
+	identifier_list:l EQUAL value:e SEMI
+	 	{: addLog("*** Reduce const_declaration"); 
+			const_environment.put(l, e);
+		:}
+	;
+	
+var_declaration_list ::=
+	var_declaration_list var_declaration
+	 	{: addLog("*** Reduce var_declaration_list"); :}
+	| var_declaration
+	 	{: addLog("*** Reduce var_declaration_list"); :}
+	;
+	
+var_declaration ::=
+	identifier_list:l COLON type:t SEMI
+	 	{: addLog("*** Reduce var_declaration"); 
+			variable_environment.put(l, t);
+		:}
+	;
+
+//////////////////////////////////////////////////
+// Déclarations et définitions des procédures
+//////////////////////////////////////////////////
+procedure_definition_part ::=
+	/* empty */
+	 	{: addLog("*** Reduce procedure_definition_part"); :}
+	| procedure_definition_list
+	 	{: addLog("*** Reduce procedure_definition_part"); :}
+	;
+	
+procedure_definition_list ::=
+	procedure_definition_list procedure_definition
+	 	{: addLog("*** Reduce procedure_definition_list"); :}
+	| procedure_definition
+	 	{: addLog("*** Reduce procedure_definition_list"); :}
+	;
+
+procedure_definition ::=
+	procedure_definition_head:id block:b
+	 	{: addLog("*** Reduce procedure_definition"); 
+		:}
+	| procedure_definition_head:id SEMI
+	 	{: addLog("*** Reduce procedure_definition"); :}
+	;
+
+procedure_definition_head ::=
+	PROCEDURE IDENTIFIER:id LPAR argt_part:env RPAR
+	 	{: addLog("*** Reduce procedure_definition_head"); 
+			function_environment.put(id, new TreeType(TypeCode.FUNCTION, new TreeType(TypeCode.VOID), env));
+			RESULT = id;
+		:}
+	| FUNCTION IDENTIFIER:id LPAR argt_part:env RPAR COLON type:t
+	 	{: addLog("*** Reduce procedure_definition_head");
+			function_environment.put(id, new TreeType(TypeCode.FUNCTION, t, env));
+			RESULT = id;
+		:}
+	;
+
+argt_part ::=
+	/* empty */
+	 	{: addLog("*** Reduce argt_part"); 
+			RESULT = new MapEnvironment<Type>("Variables locales", true);
+		:}
+	| argt_list:env
+	 	{: addLog("*** Reduce argt_part"); 
+			RESULT = env;
+		:}
+	;
+	
+argt_list ::=
+	argt_list:env COMMA argt:f
+	 	{: addLog("*** Reduce argt_list");
+			RESULT = env;
+			RESULT.put(f.getKey(), f.getValue()); 
+		:}
+	| argt:f
+	 	{: addLog("*** Reduce argt_list"); 
+			RESULT = new MapEnvironment<Type>("Variables locales", true);
+			RESULT.put(f.getKey(), f.getValue()); 
+		:}
+	;
+	
+argt ::=
+	IDENTIFIER:id COLON type:t
+	 	{: addLog("*** Reduce argt");
+			RESULT = new Pair<String, Type>(id, t);
+		:} 
+	;
+	
+block ::=
+	var_declaration_part BEGIN statement_list:s END
+	 	{: addLog("*** Reduce block"); 
+			RESULT = null;
+		:}
+	;
+	
+var_declaration_part ::=
+	/* empty */
+	| VAR var_declaration_list
+	 	{: addLog("*** Reduce var_declaration_part"); :}
+	;	
+	
+//////////////////////////////////////////////////
+// Définition des types
+//////////////////////////////////////////////////
+type ::=
+	simple_type:t
+	 	{: addLog("*** Reduce type"); 
+			RESULT = t; 
+		:}
+	| IDENTIFIER:id 
+	 	{: addLog("*** Reduce type");
+			Type type = type_environment.get(id);
+			if ((type == null) && (exceptionType))
+				throw new EnvironmentException("Type " + id + " non trouvé");
+			if (type != null)
+				RESULT = type;
+			else
+				RESULT = new TreeType(TypeCode.NAME, id);
+		:}
+	| pointer_type:t 
+	 	{: addLog("*** Reduce type");	
+			RESULT = t; 
+		:}
+	| array_type:t 
+	 	{: addLog("*** Reduce type");	
+			RESULT = t; 
+		:}
+	| enumerated_type:t 
+	 	{: addLog("*** Reduce type");	
+			RESULT = t; 
+		:}
+	| structure_type:t 
+	 	{: addLog("*** Reduce type");	
+			RESULT = t; 
+		:}	
+	;
+	
+simple_type ::=
+	STRING
+	 	{: addLog("*** Reduce simple_type");
+			RESULT = new TreeType(TypeCode.STRING); 
+		:}
+	| INTEGER
+	 	{: addLog("*** Reduce simple_type");
+			RESULT = new TreeType(TypeCode.INTEGER); 
+		:}
+	| FLOAT
+	 	{: addLog("*** Reduce simple_type");
+			RESULT = new TreeType(TypeCode.FLOAT); 
+		:}
+	| BOOLEAN
+	 	{: addLog("*** Reduce simple_type");
+			RESULT = new TreeType(TypeCode.BOOLEAN); 
+		:}
+	;
+	
+array_type ::=
+	ARRAY LBRACKET expression:e RBRACKET OF type:t
+	 	{: addLog("*** Reduce array_type");
+			Object o = e.constEval(const_environment); 
+			if (o == null)
+				throw new EnvironmentException("Constante " + e + " non trouvée");
+			if (!(o instanceof Integer))
+				throw new TypeException("entier attendu", exleft.getLine(), exleft.getColumn());
+			RESULT = new TreeType(TypeCode.ARRAY, t, (Integer)o); 
+		:}
+	;
+	
+enumerated_type ::=
+	LPAR identifier_list:l RPAR 
+	 	{: addLog("*** Reduce enumerated_type");
+			Iterator <String> iterator = l.iterator();
+			Integer value = 0;
+			Type typeEnum = new TreeType(TypeCode.ENUM, enumeredCnt); 
+			while (iterator.hasNext()){
+				String id = iterator.next();
+				const_environment.put(id, new ExprENUM(id, (Object)value, typeEnum, lxleft.getLine(), lxleft.getColumn()));
+				value++;
+			}
+			enumeredCnt++;
+			RESULT = typeEnum;
+		:}
+	;
+	
+pointer_type ::=
+	CIRC {: exceptionType = false; :} type:t 
+	 	{: addLog("*** Reduce pointer_type");
+			exceptionType = true; 
+			RESULT = new TreeType(TypeCode.POINTER, t); 
+		:}
+	;
+	
+structure_type ::=
+	STRUCT 
+		{: offset = 0; :} 
+		LBRACE feature_list_type:map RBRACE 
+	 	{: addLog("*** Reduce structure_type");
+			RESULT = new TreeType(TypeCode.STRUCT, map);
+			RESULT.setOffset(structCnt++);
+		:}
+	;
+	
+feature_list_type ::=
+	feature_list_type:map feature_type:f 
+	 	{: addLog("*** Reduce feature_list_type");
+			RESULT = map;
+			RESULT.put(f.getKey(), f.getValue()); 
+		:}
+	| feature_type:f
+	 	{: addLog("*** Reduce feature_list_type");
+			RESULT = new HashMap<String, Type>();
+			RESULT.put(f.getKey(), f.getValue()); 
+		:}
+	;
+	
+feature_type ::=
+	IDENTIFIER:id COLON:op type:t SEMI
+	 	{: addLog("*** Reduce feature_type");
+			Type type = new TreeType(t);
+			type.setOffset(offset);
+			offset += type.getSize();
+			RESULT = new Pair<String, Type>(id, type); 
+		:}
+	;
+	
+//////////////////////////////////////////////////
+// Déclaration des variables typées
+//////////////////////////////////////////////////
+identifier_list ::=
+	identifier_list:l COMMA IDENTIFIER:id
+	 	{: addLog("*** Reduce identifier_list"); 
+			RESULT = l; 
+			RESULT.add(id);
+		:}
+	| IDENTIFIER:id
+	 	{: addLog("*** Reduce identifier_list"); 
+			RESULT = new ArrayList<String>(); 
+			RESULT.add(id); 
+		:}
+	;
+	
+//////////////////////////////////////////////////
+// Instructions
+//////////////////////////////////////////////////
+statement_list_opt ::=
+	/* empty */
+	 	{: addLog("*** Reduce statement_list_opt"); 
+			RESULT = null;
+		:}
+	| statement_list:s
+	 	{: addLog("*** Reduce statement_list_opt"); 
+			RESULT = s;
+		:}
+	;
+	
+statement_list ::=
+	statement_list:s1 statement:s2
+	 	{: addLog("*** Reduce statement_list"); 
+			RESULT = new StmSEQ(s1, s2, s1xleft.getLine(), s2xleft.getColumn());
+		:}
+	| statement:s 
+	 	{: addLog("*** Reduce statement_list"); 
+			RESULT = s;
+		:}
+	;
+	
+statement ::=
+	simple_statement_with_semi:s
+	 	{: addLog("*** Reduce statement"); 
+			RESULT = s;
+		:}
+	| structured_statement:s
+	 	{: addLog("*** Reduce statement"); 
+			RESULT = s;
+		:}
+	;
+	
+simple_statement_with_semi ::=
+	simple_statement:s SEMI
+	 	{: addLog("*** Reduce simple_statement_with_semi"); 
+			RESULT = s;
+		:}
+	;
+	
+simple_statement ::=
+	variable_access:v EQUAL:op expression:e
+	 	{: addLog("*** Reduce simple_statement"); 
+			RESULT = new StmAFF(v, e, opxleft.getLine(), opxleft.getColumn());
+		:}
+	| expression:e
+	 	{: addLog("*** Reduce simple_statement"); 
+			RESULT = new StmEXPR(e, exleft.getLine(), exleft.getColumn());
+		:}
+	| PRINT:op expression:e
+	 	{: addLog("*** Reduce simple_statement"); 
+			RESULT = new StmPRINT(e, opxleft.getLine(), opxleft.getColumn());
+		:}
+	| PRINTLN:op expression:e
+	 	{: addLog("*** Reduce simple_statement"); 
+			RESULT = new StmPRINTLN(e, opxleft.getLine(), opxleft.getColumn());
+		:}
+	| READLN:op expression:e
+	 	{: addLog("*** Reduce simple_statement"); 
+			RESULT = new StmREADLN(e, opxleft.getLine(), opxleft.getColumn());
+		:}
+	| NEW:op expression:e
+	 	{: addLog("*** Reduce simple_statement"); 
+			RESULT = new StmNEW(e, opxleft.getLine(), opxleft.getColumn());
+		:}
+	| DISPOSE:op expression:e
+	 	{: addLog("*** Reduce simple_statement"); 
+			RESULT = new StmDISPOSE(e, opxleft.getLine(), opxleft.getColumn());
+		:}
+	;
+	
+structured_statement ::=
+	LBRACE statement_list_opt:s RBRACE
+	 	{: addLog("*** Reduce structured_statement"); 
+			RESULT = s; 
+		:}
+	| IF:op LPAR expression:e RPAR statement:s
+	 	{: addLog("*** Reduce structured_statement"); 
+			RESULT = new StmIF(e, s, null, opxleft.getLine(), opxleft.getColumn()); 
+		:}
+	| IF:op LPAR expression:e RPAR statement:s1 ELSE statement:s2
+	 	{: addLog("*** Reduce structured_statement"); 
+			RESULT = new StmIF(e, s1, s2, opxleft.getLine(), opxleft.getColumn()); 
+		:}
+	| WHILE:op LPAR expression:e RPAR statement:s
+	 	{: addLog("*** Reduce structured_statement"); 
+			RESULT = new StmWHILE(e, s, opxleft.getLine(), opxleft.getColumn()); 
+		:}
+	| FOR:op LPAR simple_statement:s1 SEMI expression:e SEMI simple_statement:s2 RPAR statement:s3
+	 	{: addLog("*** Reduce structured_statement"); 
+			RESULT =  new StmFOR(e, s1, s2, s3, opxleft.getLine(), opxleft.getColumn());;
+		:}
+	| SWITCH:op expression:e LBRACE case_statement_list:l default_statement_opt:s RBRACE
+	 	{: addLog("*** Reduce structured_statement"); 
+			RESULT = new StmSWITCH(e, l, s, opxleft.getLine(), opxleft.getColumn()); 
+		:}
+	;
+	
+case_statement_list ::=
+	case_statement_list:l case_statement:s
+	 	{: addLog("*** Reduce case_statement_list"); 
+			RESULT = l;
+			l.add(s);
+		:}
+	| case_statement:s
+	 	{: addLog("*** Reduce case_statement_list"); 
+			RESULT = new ArrayList<Stm>();
+			RESULT.add(s);
+		:}
+	;
+	
+case_statement ::=
+	CASE:op expression:e COLON statement:s
+	 	{: addLog("*** Reduce case_statement"); 
+			RESULT = new StmCASE(e, s, opxleft.getLine(), opxleft.getColumn()); 
+		:}
+	;
+	
+default_statement_opt ::=
+	/* empty */
+	 	{: addLog("*** Reduce case_statement"); 
+			RESULT = null;
+		:}
+	| DEFAULT:op COLON statement:s
+	 	{: addLog("*** Reduce case_statement"); 
+			RESULT = new StmCASE(s, opxleft.getLine(), opxleft.getColumn()); 
+		:}
+	;
+	
+variable_access ::=
+	IDENTIFIER:id
+	 	{: addLog("*** Reduce variable_access");
+			// On cherche dans les constantes
+			ExprVALUE exprValue = const_environment.get(id);
+			if (exprValue != null)
+				RESULT = exprValue;
+			else {
+				// On cherche dans les variables
+				Type type = (Type) variable_environment.get(id); 
+				if (type == null) {
+					type = (Type) function_environment.get(id);
+					if (type == null) {
+						throw new EnvironmentException(id + " non trouvé");
+					}
+				}	
+				RESULT = new ExprVARIABLE(type, id, idxleft.getLine(), idxleft.getColumn());
+			}
+		:}
+	| variable_access:v CIRC:op
+	 	{: addLog("*** Reduce variable_access"); 
+			RESULT = new ExprPOINTER(v, opxleft.getLine(), opxleft.getColumn()); 
+		:}
+	| AROBASE:op variable_access:v 
+	 	{: addLog("*** Reduce variable_access"); 
+			RESULT = new ExprADDRESS(v, opxleft.getLine(), opxleft.getColumn()); 
+		:}
+	| variable_access:v DOT:op IDENTIFIER:id
+	 	{: addLog("*** Reduce variable_access"); 
+			Type type = v.getType();
+			if (v.getTypeCode() == TypeCode.NAME) {
+				type = type_environment.get((String)type.getData());
+				v.setType(type);
+			}
+			RESULT = new ExprDOT(v, id, opxleft.getLine(), opxleft.getColumn()); 
+		:}
+	| variable_access:v LBRACKET:op expression:e RBRACKET
+	 	{: addLog("*** Reduce variable_access"); 
+			RESULT = new ExprARRAY(v, e, opxleft.getLine(), opxleft.getColumn()); 
+		:}
+	| variable_access:fct LPAR arg_list_part RPAR
+	 	{: addLog("*** Reduce variable_access"); 
+			//RESULT = new ExprCALL(fct, args, opxleft.getLine(), opxleft.getColumn()); 
+		:}
+	;
+
+//////////////////////////////////////////////////
+// Liste d'expressions passés en argument d'une procédure
+//////////////////////////////////////////////////
+arg_list_part ::=
+	/* empty */
+	 	{: addLog("*** Reduce arg_part"); :}
+	| arg_list
+	 	{: addLog("*** Reduce arg_part"); :}
+	;
+	
+arg_list ::=
+	arg_list COMMA arg
+	 	{: addLog("*** Reduce arg_list"); :}
+	| arg
+	 	{: addLog("*** Reduce arg_list"); :}
+	;
+	
+arg ::=
+	expression
+	 	{: addLog("*** Reduce arg"); :}
+	;
+	
+//////////////////////////////////////////////////
+// Expressions
+//////////////////////////////////////////////////
+expression ::=
+	expression:e1 PLUS:op expression:e2
+	 	{: addLog("*** Reduce expression"); 
+			RESULT = new ExprPLUS(e1, e2, opxleft.getLine(), opxleft.getColumn());
+		:}
+	| expression:e1 MINUS:op expression:e2
+	 	{: addLog("*** Reduce expression"); 
+			RESULT = new ExprMINUS(e1, e2, opxleft.getLine(), opxleft.getColumn()); 
+		:}
+	| MINUS:op expression:e 
+	 	{: addLog("*** Reduce expression"); 
+			RESULT = new ExprUMINUS(e, opxleft.getLine(), opxleft.getColumn()); 
+		:}
+	 	%prec UMINUS
+	| expression:e1 MUL:op expression:e2
+	 	{: addLog("*** Reduce expression"); 
+			RESULT = new ExprMUL(e1, e2, opxleft.getLine(), opxleft.getColumn()); 
+		:}
+	| expression:e1 DIV:op expression:e2
+	 	{: addLog("*** Reduce expression"); 
+			RESULT = new ExprDIV(e1, e2, opxleft.getLine(), opxleft.getColumn()); 
+		:}
+	| expression:e1 MOD:op expression:e2
+	 	{: addLog("*** Reduce expression"); 
+			RESULT = new ExprMOD(e1, e2, opxleft.getLine(), opxleft.getColumn()); 
+		:}
+	| expression:e1 OR:op expression:e2
+	 	{: addLog("*** Reduce expression"); 
+			RESULT = new ExprOR(e1, e2, opxleft.getLine(), opxleft.getColumn()); 
+		:}
+	| expression:e1 AND:op expression:e2
+	 	{: addLog("*** Reduce expression"); 
+			RESULT = new ExprAND(e1, e2, opxleft.getLine(), opxleft.getColumn()); 
+		:}
+	| NOT:op expression:e
+	 	{: addLog("*** Reduce expression"); 
+			RESULT = new ExprNOT(e, opxleft.getLine(), opxleft.getColumn());
+		:}
+	| expression:e1 LT:op expression:e2
+	 	{: addLog("*** Reduce expression"); 
+			RESULT = new ExprLT(e1, e2, opxleft.getLine(), opxleft.getColumn()); 
+		:}
+	| expression:e1 LE:op expression:e2
+	 	{: addLog("*** Reduce expression"); 
+			RESULT = new ExprLE(e1, e2, opxleft.getLine(), opxleft.getColumn()); 
+		:}
+	| expression:e1 GT:op expression:e2
+	 	{: addLog("*** Reduce expression"); 
+			RESULT = new ExprGT(e1, e2, opxleft.getLine(), opxleft.getColumn()); 
+		:}
+	| expression:e1 GE:op expression:e2
+	 	{: addLog("*** Reduce expression"); 
+			RESULT = new ExprGE(e1, e2, opxleft.getLine(), opxleft.getColumn()); 
+		:}
+	| expression:e1 EQ:op expression:e2
+	 	{: addLog("*** Reduce expression"); 
+			RESULT = new ExprEQ(e1, e2, opxleft.getLine(), opxleft.getColumn()); 
+		:}
+	| expression:e1 NE:op expression:e2
+	 	{: addLog("*** Reduce expression"); 
+			RESULT = new ExprNE(e1, e2, opxleft.getLine(), opxleft.getColumn()); 
+		:}
+	| LPAR expression:e RPAR
+	 	{: addLog("*** Reduce expression"); 
+			RESULT = e; 
+		:}
+	| variable_access:v
+	 	{: addLog("*** Reduce expression"); 
+			RESULT = v; 
+		:}
+	| value:e
+	 	{: addLog("*** Reduce expression"); 
+			RESULT = e; 
+		:}
+	;
+	
+value ::=
+	INTEGER_VALUE:l
+	 	{: addLog("*** Reduce value"); 
+			RESULT = new ExprVALUE(l, lxleft.getLine(), lxleft.getColumn()); 
+		:}
+	| FLOAT_VALUE:l
+	 	{: addLog("*** Reduce value"); 
+			RESULT = new ExprVALUE(l, lxleft.getLine(), lxleft.getColumn()); 
+		:}
+	| STRING_VALUE:l
+	 	{: addLog("*** Reduce value"); 
+			RESULT = new ExprVALUE(l, lxleft.getLine(), lxleft.getColumn()); 
+		:}
+	| TRUE:l
+	 	{: addLog("*** Reduce value"); 
+			RESULT = new ExprVALUE(true, lxleft.getLine(), lxleft.getColumn()); 
+		:}
+	| FALSE:l
+	 	{: addLog("*** Reduce value"); 
+			RESULT = new ExprVALUE(false, lxleft.getLine(), lxleft.getColumn()); 
+		:}
+	| NULL:l
+	 	{: addLog("*** Reduce value"); 
+			RESULT = new ExprVALUE(false, lxleft.getLine(), lxleft.getColumn()); 
+		:}
+	;

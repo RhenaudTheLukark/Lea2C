@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- ====================================================================== 
+
+Léa
+
+2020/04/12
+Lionel                                                                
+====================================================================== -->
+<project name="Léa" default="exec" basedir=".">
+
+	<description>Compilation de la grammaire d'expressions de type</description>
+
+	<property name="src" location="src" />
+	<property name="parser" location="src/fr/ubordeaux/deptinfo/compilation/lea/parser" />
+	<property name="tokenizer" location="src/fr/ubordeaux/deptinfo/compilation/lea/tokenizer" />
+	<property name="bin" location="bin" />
+	<property name="tools" location="tools" />
+	<property name="base" location="." />
+	<property name="data" location="data" />
+
+	<taskdef name="cup" classname="java_cup.anttask.CUPTask" classpath="${tools}/java-cup-11b.jar" />
+	<taskdef name="jflex" classname="jflex.anttask.JFlexTask" classpath="${tools}/jflex-full-1.7.0.jar" />
+
+	<!-- ================================= 
+	== action: cup              
+	================================= -->
+	<target name="parser" description="Compile le parser">
+		<delete file="${parser}/Parser.java"/>
+
+		<cup srcfile="${parser}/Parser.cup" 
+			destdir="${src}" 
+			parser="Parser" 
+			symbols="Symbols" 
+			locations="true" />
+
+		<fail message="Cup a échoué">
+			<condition>
+				<not>
+					<resourcecount count="1">
+						<fileset id="fs" dir="${parser}" includes="Parser.java"/>
+					</resourcecount>
+				</not>
+			</condition>
+		</fail>
+	</target>
+
+	<!-- ================================= 
+	== action: jflex              
+	================================= -->
+	<target name="tokenizer" description="Compile le tokenizer">
+		<delete file="${tokenizer}/tokenizer.java"/>
+
+		<jflex file="${tokenizer}/Tokenizer.jflex" destdir="${src}" />
+
+		<fail message="Jflex a échoué">
+			<condition>
+				<not>
+					<resourcecount count="1">
+						<fileset id="fs" dir="${tokenizer}" includes="Tokenizer.java"/>
+					</resourcecount>
+				</not>
+			</condition>
+		</fail>
+	</target>
+
+	<!-- ================================= 
+	== action: project              
+	================================= -->
+	<target name="exec" depends="compile" description="Exécution">
+		<java classname="Main" classpath="${bin}:${tools}/java-cup-11b-runtime.jar" 
+			output="${data}/progr-1.c"
+			error="${data}/progr-1.log">
+			<arg value="${data}/progr-1.lea" />
+		</java>
+		<java classname="Main" 
+			classpath="${bin}:${tools}/java-cup-11b-runtime.jar" 
+			output="${data}/progr-2.c"
+			error="${data}/progr-2.log">
+			<arg value="${data}/progr-2.lea" />
+		</java>
+		<java classname="Main" 
+			classpath="${bin}:${tools}/java-cup-11b-runtime.jar" 
+			output="${data}/progr-3.c"
+			error="${data}/progr-3.log">
+			<arg value="${data}/progr-3.lea" />
+		</java>
+		<java classname="Main" 
+			classpath="${bin}:${tools}/java-cup-11b-runtime.jar" 
+			output="${data}/progr-4.c"
+			error="${data}/progr-4.log">
+			<arg value="${data}/progr-4.lea" />
+		</java>
+		<java classname="Main" 
+			classpath="${bin}:${tools}/java-cup-11b-runtime.jar" 
+			output="${data}/progr-5.c"
+			error="${data}/progr-5.log">
+			<arg value="${data}/progr-5.lea" />
+		</java>
+		<java classname="Main" 
+			classpath="${bin}:${tools}/java-cup-11b-runtime.jar" 
+			output="${data}/progr-6.c"
+			error="${data}/progr-6.log">
+			<arg value="${data}/progr-6.lea" />
+		</java>
+		<java classname="Main" 
+			classpath="${bin}:${tools}/java-cup-11b-runtime.jar" 
+			output="${data}/progr-7.c"
+			error="${data}/progr-7.log">
+			<arg value="${data}/progr-7.lea" />
+		</java>
+		<java classname="Main" 
+			classpath="${bin}:${tools}/java-cup-11b-runtime.jar" 
+			output="${data}/progr-8.c"
+			error="${data}/progr-8.log">
+			<arg value="${data}/progr-8.lea" />
+		</java>
+		<java classname="Main" 
+			classpath="${bin}:${tools}/java-cup-11b-runtime.jar" 
+			output="${data}/progr-9.c"
+			error="${data}/progr-9.log">
+			<arg value="${data}/progr-9.lea" />
+		</java>
+	</target>
+
+	<!-- ================================= 
+	== target: javac              
+	================================= -->
+	<target name="compile" depends="parser, tokenizer" description="Compile les fichiers java">
+		<mkdir dir="${bin}" />
+		<path id="libraries">
+			<files includes="${tools}/java-cup-11b-runtime.jar" />
+		</path>
+
+		<javac includeantruntime="false" srcdir="${src}" destdir="${bin}">
+			<classpath refid="libraries" />
+		</javac>
+	</target>
+
+	<!-- ================================= 
+	== target: clean              
+	================================= -->
+	<target name="clean" description="Efface les fichiers générés">
+		<delete file="${parser}/Parser.java" />
+		<delete file="${parser}/Symbols.java" />
+		<delete file="${tokenizer}/Tokenizer.java" />
+		<delete dir="${bin}" />
+		<delete>
+			<fileset dir="${data}" includes="*.c" />
+			<fileset dir="${data}" includes="*.log" />
+		</delete>
+	</target>
+
+</project>

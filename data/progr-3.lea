@@ -1,0 +1,61 @@
+/////////////////////////////////////////////////////////
+// pointeurs
+/////////////////////////////////////////////////////////
+type 
+
+s = struct {
+	a: integer;
+	b: integer;
+};
+
+var
+p1, p2 : ^integer;
+q : integer;
+r : array [12] of s;
+z : ^s;
+
+begin
+println "$$$ new p1";
+new p1;
+
+println "$$$ p1^ = 8";
+p1^ = 8;
+print "p1:";
+println p1;
+print "p1^:";
+println p1^;
+
+println "$$$ dispose";
+dispose p1;
+print "p1:";
+println p1;
+
+println ("$$$ q=7*(2+6)");
+q=7*(2+6);
+print "q:";
+println q;
+
+println ("$$$ p1 = @q");
+p1 = @q;
+print "p1:";
+println p1;
+print "p1^:";
+println p1^;
+
+println ("$$$ p2 = p1");
+p2 = p1;
+print "p2:";
+println p2;
+print "p2^:";
+println p2^;
+
+new z;
+z^.a = 5;
+z^.b = 6;
+r[3] = z^;
+println r[3].a;
+println r[3].b;
+
+end
+
+

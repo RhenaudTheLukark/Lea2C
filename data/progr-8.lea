@@ -1,0 +1,44 @@
+/////////////////////////////////////////////////////////
+// Définition inductive des Structures
+/////////////////////////////////////////////////////////
+
+type
+
+Node = struct {
+	data1: integer;
+	data2: integer;
+	next: ^Node;
+	e: string;
+};
+
+Deque = struct {
+	first: ^Node;
+	last: ^Node;
+};
+
+var
+A, B: ^Node;
+C: Node;
+s: string;
+
+begin
+
+C.data2 = 36;
+
+new A;
+A^.data2 = 1;
+A^.e = "un";
+
+new B;
+B^.data2 = 2;
+B^.e = "deux";
+
+A^.next = B;
+
+println B^.data2;
+println A^.next^.data2;
+
+dispose A;
+dispose B;
+
+end
