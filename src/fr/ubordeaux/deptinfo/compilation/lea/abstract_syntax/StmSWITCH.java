@@ -21,12 +21,35 @@ public class StmSWITCH extends StmList {
 	public String generateCode() throws CodeException {
 		String result = "";
 		result += super.generateCode();
-		// TODO
-		result += tab() + "_SWITCH_" + this.getId() + ":" + NL;
-		this.incIndent();
-		result += tab() + "// Code SWITCH ici..." + NL;
-		result += tab() + "printf(\"--- Manque SWITCH...\\n\");" + NL;
-		this.decIndent();
+
+		//init
+		String checkVal = "switch_check_" + getId();
+		String endLabel = "switch_end_" + getId();
+		result += tab() + "int " + checkVal + ";" + NL;
+
+		for (int caseNum = 0; caseNum < getStms().size(); caseNum++) {
+			String caseLabel = "switch_" + getId() + "_case_" + caseNum;
+			Expr caseExpr = ((StmCASE)getStms().get(caseNum)).getExpr();
+
+			result += NL + tab() + "//case " + caseExpr + NL;
+
+			//check case
+			result += tab() + checkVal + " = " + expr + " != " + caseExpr.generateCode() + ";" + NL;
+			result += tab() + "if (" + checkVal + ") goto " + caseLabel + ";" + NL;
+
+			//case code
+			result += getStms().get(caseNum).generateCode();
+
+			//next case/switch end
+			result += tab() + "goto " + endLabel + ";" + NL;
+			result += tab() + caseLabel + ":" + NL;
+		}
+		
+		//default
+		result += defaultStm.generateCode();
+		//end
+		result += tab() + endLabel + ":" + NL;
+
 		return result;
 	}
 
