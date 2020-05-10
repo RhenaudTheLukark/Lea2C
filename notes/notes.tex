@@ -4,8 +4,8 @@
 \usepackage[T1]{fontenc}
 \usepackage[francais]{babel}
 \usepackage[most]{tcolorbox}
-
 \usepackage{helvet}
+
 \renewcommand{\familydefault}{\sfdefault}
 
 
@@ -38,19 +38,37 @@ boxrule=0pt,boxsep=0pt,breakable}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection*{Objectifs}
-le caca des pigeons c'est caca, faut pas manger
-\begin{codequote}
-    lalalalalalalalalla
-\end{codequote}
-\vspace{1cm}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection*{Implémentation et difficultés}
+\textbf{Implémentation du IF ELSE:}
 
-
+\begin{codequote}
+    \begin{verbatim}
+        if(XXX) {
+            YYY
+        } else {
+            ZZZ
+        }
+    \end{verbatim}
+\end{codequote}
+Code à générer :\\
+\begin{codequote}
+    \begin{verbatim}
+        int _t_ = XXX;
+        if (_t_) goto label_then;
+        label_else;
+        ZZZ
+        goto label_endif;
+        label_then;
+        YYY
+        label_endif;
+    \end{verbatim}
+\end{codequote}
+On notera que label\_else est seulement utile à la compréhension.
 
 
 
