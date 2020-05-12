@@ -16,19 +16,42 @@ public class StmWHILE extends StmUnary {
 	public String generateCode() throws CodeException {
 		String result = "";
 		result += super.generateCode();
-		// TODO
-		result += tab() + "_WHILE_" + this.getId() + ":" + NL;
-		this.incIndent();
-		result += tab() + "// Code WHILE ici..." + NL;
-		result += tab() + "printf(\"--- Manque WHILE...\\n\");" + NL;
-		this.decIndent();
+		
+		String label_debut = "_while_label_debut__" + this.getId();
+		String label_then = "_while_label_then__" + this.getId();
+		String label_fin = "_while_label_fin__" + this.getId();
+
+		result += tab() + label_debut + ": {" + NL;
+			incIndent();
+
+			result += tab() + "if (" + test.generateCode() + ")" + NL;
+				incIndent();
+				result += tab() + "goto " + label_then + ";" + NL;
+				decIndent();
+			result += tab() + "else" + NL;
+				incIndent();
+				result += tab() + "goto " + label_fin + ";" + NL;
+				decIndent();
+			
+			result += tab() + label_then + ": {" + NL;
+				incIndent();
+				result += getSon().generateCode();
+				result += tab() + "goto " + label_debut + ";" + NL;
+				decIndent();
+			result += tab() + "}" + NL;
+			
+			decIndent();
+		result += tab() + "}" + NL;
+		
+		result += tab() + label_fin + ": { }" + NL;
+		
 		return result;
 	}
 
 	@Override
 	public void checkType() throws TypeException {
 		test.checkType();
-		if (this.getSon()!=null)
+		if (this.getSon() != null)
 			getSon().checkType();
 		test.getType().assertType(this, TypeCode.BOOLEAN);
 	}
