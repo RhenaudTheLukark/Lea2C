@@ -1,0 +1,53 @@
+/////////////////////////////////////////////////////////
+// Tableaux de structures
+/////////////////////////////////////////////////////////
+
+type
+Color = (BROWN, BLUE, BLACK, GREEN);
+
+computer = struct {
+	id: integer;
+	description: string;
+};
+
+user = struct {
+	id: integer;
+	nb: integer;
+	color: Color;
+};
+
+type
+T = array [10] of array [10] of user;
+
+var
+table: T;
+i, j, k: integer;
+
+begin
+
+k = 0;
+for (i = 0 ; i < 10 ; i = i+1) {
+	for (j = 0 ; j < 10 ; j = j+1) {
+		table[i][j].id = k+1;
+		table[i][j].nb = (i+1)*(j+1);
+		switch (k % 4){
+			case 0: table[i][j].color = BROWN;
+			case 1: table[i][j].color = BLUE;
+			case 2: table[i][j].color = BLACK;
+			case 3: table[i][j].color = GREEN;
+		}
+		k = k+1;
+	}
+}
+for (i = 0 ; i < 10 ; i = i+1) {
+	for (j = 0 ; j < 10 ; j = j+1) {
+		print table[i][j].id;
+		print ":";
+		print table[i][j].nb;
+		print "("; print table[i][j].color; print ") ";
+	}
+	println "";
+}
+end
+
+
