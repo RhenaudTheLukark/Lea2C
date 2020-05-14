@@ -38,6 +38,9 @@ boxrule=0pt,boxsep=0pt,breakable}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection*{Objectifs}
+L'objectif de ce projet est de presque finaliser la création d'un langage de programmation. L'essentiel du processus étant déjà fait, nous n'avions qu'à implémenter la génération d'un code en C fonctionnel pour les structures "if else", "for", "while" et "switch".
+\\
+L'idée est de générer un code C mais en utilisant uniquement des "goto" et des "if" sur une valeur et sans "else". En effet il sera ensuite plus facile de traduire ce code en assembleur.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -155,8 +158,6 @@ Code à générer :
     \end{verbatim}
 \end{codequote}
 On remarquera que notre switch ne peut pas grouper des cas, car il y a un "break" automatique.
-
-\textbf{NB:} Dans ce projet la vérification des types était déjà faite.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
