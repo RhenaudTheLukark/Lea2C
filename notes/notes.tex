@@ -60,16 +60,37 @@ Code à générer :\\
     \begin{verbatim}
         int _t_ = XXX;
         if (_t_) goto label_then;
-        label_else;
+        label_else:
         ZZZ
         goto label_endif;
-        label_then;
+        label_then:
         YYY
-        label_endif;
+        label_endif:
     \end{verbatim}
 \end{codequote}
-On notera que label\_else est seulement utile à la compréhension.
+On notera que label\_else est seulement utile à la compréhension.\\
 
+\textbf{Implémentation du WHILE:}
+\begin{codequote}
+    \begin{verbatim}
+        while (XXX) {
+            YYY
+        }
+    \end{verbatim}
+\end{codequote}
+Code à générer :\\
+\begin{codequote}
+    \begin{verbatim}
+        label_begin:
+        int _t_ = XXX;
+        if(_t_) goto label_then;
+        goto label_end;
+        label_then:
+        YYY
+        goto label_begin;
+        label_end:
+    \end{verbatim}
+\end{codequote}
 
 
 
