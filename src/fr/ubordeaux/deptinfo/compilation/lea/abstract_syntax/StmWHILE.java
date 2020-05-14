@@ -29,10 +29,7 @@ public class StmWHILE extends StmUnary {
 				incIndent();
 				result += tab() + "goto " + label_then + ";" + NL;
 				decIndent();
-			result += tab() + "else" + NL;
-				incIndent();
-				result += tab() + "goto " + label_fin + ";" + NL;
-				decIndent();
+			result += tab() + "goto " + label_fin + ";" + NL;
 			
 			result += tab() + label_then + ": {" + NL;
 				incIndent();
