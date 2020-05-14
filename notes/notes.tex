@@ -118,7 +118,45 @@ Code à générer :
 \end{codequote}
 
 
-Dans ce projet la vérification des types était déjà faites.
+\textbf{Implémentation du SWITCH:}
+\begin{codequote}
+    \begin{verbatim}
+        switch (XXX){
+            case YYY_A: ZZZ_A
+            case YYY_B: ZZZ_B
+            case YYY_C: ZZZ_C
+            ...
+            default: ZZZ_0 
+        }
+    \end{verbatim}
+\end{codequote}
+Code à générer :
+\begin{codequote}
+    \begin{verbatim}
+        int _t_;
+        _t_ = (XXX != YYY_A)
+        if(_t_) goto label_B;
+        ZZZ_A
+        goto label_end;
+        label_B:
+        _t_ = (XXX != YYY_B)
+        if(_t_) goto label_C;
+        ZZZ_B
+        goto label_end;
+        label_C:
+        _t_ = (XXX != YYY_C)
+        if(_t_) goto label_D;
+        ZZZ_C
+        goto label_end;
+        label_D:
+        ...
+        ZZZ_0
+        label_end:
+    \end{verbatim}
+\end{codequote}
+On remarquera que notre switch ne peut pas grouper des cas, car il y a un "break" automatique.
+
+\textbf{NB:} Dans ce projet la vérification des types était déjà faite.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
