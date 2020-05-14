@@ -17,14 +17,15 @@ public class StmWHILE extends StmUnary {
 		String result = "";
 		result += super.generateCode();
 		
+		String var = "_while_test__" + this.getId();
 		String label_debut = "_while_label_debut__" + this.getId();
 		String label_then = "_while_label_then__" + this.getId();
 		String label_fin = "_while_label_fin__" + this.getId();
 
 		result += tab() + label_debut + ": {" + NL;
 			incIndent();
-
-			result += tab() + "if (" + test.generateCode() + ")" + NL;
+			result += tab() + "int " + var + " = " + test.generateCode() + ";" + NL;
+			result += tab() + "if (" + var + ")" + NL;
 				incIndent();
 				result += tab() + "goto " + label_then + ";" + NL;
 				decIndent();
