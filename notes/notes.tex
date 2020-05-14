@@ -55,7 +55,7 @@ boxrule=0pt,boxsep=0pt,breakable}
         }
     \end{verbatim}
 \end{codequote}
-Code à générer :\\
+Code à générer :
 \begin{codequote}
     \begin{verbatim}
         int _t_ = XXX;
@@ -78,7 +78,7 @@ On notera que label\_else est seulement utile à la compréhension.\\
         }
     \end{verbatim}
 \end{codequote}
-Code à générer :\\
+Code à générer :
 \begin{codequote}
     \begin{verbatim}
         label_begin:
@@ -93,6 +93,32 @@ Code à générer :\\
 \end{codequote}
 
 
+\textbf{Implémentation du FOR:}
+\begin{codequote}
+    \begin{verbatim}
+        for( XXX ; YYY ; ZZZ) {
+            AAA
+        }
+    \end{verbatim}
+\end{codequote}
+Code à générer :
+\begin{codequote}
+    \begin{verbatim}
+        XXX
+        label_test:
+        int _t_ = YYY;
+        if(_t_) goto label_then;
+        goto label_end;
+        label_then:
+        AAA
+        ZZZ
+        goto label_test;
+        label_end:
+    \end{verbatim}
+\end{codequote}
+
+
+Dans ce projet la vérification des types était déjà faites.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
