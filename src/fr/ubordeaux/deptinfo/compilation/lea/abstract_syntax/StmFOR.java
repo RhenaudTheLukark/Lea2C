@@ -60,7 +60,7 @@ public class StmFOR extends StmTernary {
 
 	@Override
 	public String toString() {
-		return "for (... ; ... ; ...)";
+		return "for ( " + getFirst() + " ; " + expr + " ; " + getSecond() + " )";
 	}
 
 }
